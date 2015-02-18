@@ -48,6 +48,7 @@ struct LIBFREENECT2_API Frame
   // this is unavailable in rgb Frame
   //! @note In my environment, this increase about 267 in every frame.so this is not second or milisec.
   uint32_t timestamp;
+  uint32_t sequence;
 
   Frame(size_t width, size_t height, size_t bytes_per_pixel) :
     width(width),
