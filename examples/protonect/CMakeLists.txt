@@ -7,7 +7,9 @@ SET(MY_DIR ${libfreenect2_SOURCE_DIR})
 
 OPTION(ENABLE_CXX11 "Enable C++11 support" OFF)
 OPTION(ENABLE_OPENCL "Enable OpenCL support" ON)
+OPTION(ENABLE_CUDA "Enable CUDA support" ON)
 OPTION(ENABLE_OPENGL "Enable OpenGL support" ON)
+OPTION(ENABLE_TEGRA_JPEG "Enable Tegra JPEG library" ON)
 
 IF(ENABLE_CXX11)
   INCLUDE(CheckCXXCompilerFlag)
@@ -39,11 +41,10 @@ SET(LIBRARY_OUTPUT_PATH ${MY_DIR}/lib)
 
 FIND_PACKAGE(OpenCL)
 
-# dependencies
-FIND_PACKAGE(OpenCV REQUIRED)
+FIND_PACKAGE(CUDA)
 
-# OpenCV
-INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIR})
+# dependencies
+FIND_PACKAGE(OpenCV)
 
 # LibUSB
 INCLUDE_DIRECTORIES("${MY_DIR}/../../depends/libusb/include/libusb-1.0/")
@@ -94,7 +95,6 @@ SET(SOURCES
 
 SET(LIBRARIES
   usb-1.0
-  ${OpenCV_LIBS}
   turbojpeg
   ${LIBFREENECT2_THREADING_LIBRARIES}
 )
@@ -105,6 +105,19 @@ SET(RESOURCES
   zTable.bin
 )
 
+FIND_LIBRARY(TEGRA_JPEG_LIBRARY jpeg PATHS /usr/lib/arm-linux-gnueabihf/tegra NO_DEFAULT_PATH)
+
+IF(ENABLE_TEGRA_JPEG AND TEGRA_JPEG_LIBRARY)
+  SET(LIBFREENECT2_WITH_TEGRA_JPEG_SUPPORT 1)
+  INCLUDE_DIRECTORIES("${MY_DIR}/../../depends/nv_headers")
+  MESSAGE(STATUS "Found Tegra hardware accelerated JPEG support ${TEGRA_JPEG_LIBRARY}")
+  LIST(APPEND SOURCES
+    src/tegra_jpeg_rgb_packet_processor.cpp
+  )
+  LIST(APPEND LIBRARIES
+    ${TEGRA_JPEG_LIBRARY}
+  )
+ENDIF(ENABLE_TEGRA_JPEG AND TEGRA_JPEG_LIBRARY)
 
 IF(ENABLE_OPENGL)
   SET(LIBFREENECT2_WITH_OPENGL_SUPPORT 1)
@@ -145,6 +158,25 @@ IF(ENABLE_OPENCL AND OPENCL_FOUND)
   )
 ENDIF(ENABLE_OPENCL AND OPENCL_FOUND)
 
+IF(ENABLE_CUDA AND CUDA_FOUND)
+  MESSAGE(STATUS "CUDA enabled")
+  SET(LIBFREENECT2_WITH_CUDA_SUPPORT 1)
+
+  CUDA_INCLUDE_DIRECTORIES("${MY_DIR}/include/" "${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc")
+  CUDA_COMPILE(CUDA_OBJECTS src/cuda_depth_packet_processor.cu OPTIONS -use_fast_math -Xcompiler -fPIC)
+
+  INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
+
+  LIST(APPEND SOURCES
+    src/cuda_depth_packet_processor.cpp
+    ${CUDA_OBJECTS}
+  )
+
+  LIST(APPEND LIBRARIES
+    ${CUDA_LIBRARIES}
+  )
+ENDIF(ENABLE_CUDA AND CUDA_FOUND)
+
 CONFIGURE_FILE("${MY_DIR}/include/libfreenect2/config.h.in" "${MY_DIR}/include/libfreenect2/config.h" @ONLY)
 
 GENERATE_RESOURCES(${RESOURCES_INC_FILE} ${MY_DIR} ${RESOURCES})
@@ -161,6 +193,18 @@ ADD_EXECUTABLE(Protonect
   
 TARGET_LINK_LIBRARIES(Protonect
   freenect2
+)
+
+ADD_EXECUTABLE(test_cuda_kernel
+  src/test_cuda_depth_packet_processor_kernel.cpp
+)
+
+TARGET_LINK_LIBRARIES(test_cuda_kernel
+  freenect2
+)
+
+ADD_EXECUTABLE(compare_floats
+  src/compare_floats.cpp
 )
 
 CONFIGURE_FILE(freenect2.cmake.in "${PROJECT_BINARY_DIR}/freenect2Config.cmake" @ONLY)

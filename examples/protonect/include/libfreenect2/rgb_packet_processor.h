@@ -41,12 +41,11 @@ struct LIBFREENECT2_API RgbPacket
 {
   uint32_t sequence;
 
+  uint32_t timestamp;
   unsigned char *jpeg_buffer;
   size_t jpeg_buffer_length;
 };
 
-// explicit instantiation and export to make vsc++ happy
-template class LIBFREENECT2_API PacketProcessor<RgbPacket>;
 typedef PacketProcessor<RgbPacket> BaseRgbPacketProcessor;
 
 class LIBFREENECT2_API RgbPacketProcessor : public BaseRgbPacketProcessor
@@ -80,6 +79,19 @@ protected:
   virtual void process(const libfreenect2::RgbPacket &packet);
 private:
   TurboJpegRgbPacketProcessorImpl *impl_;
+};
+
+class TegraJpegRgbPacketProcessorImpl;
+
+class TegraJpegRgbPacketProcessor : public RgbPacketProcessor
+{
+public:
+  TegraJpegRgbPacketProcessor();
+  virtual ~TegraJpegRgbPacketProcessor();
+protected:
+  virtual void process(const libfreenect2::RgbPacket &packet);
+private:
+  TegraJpegRgbPacketProcessorImpl *impl_;
 };
 
 } /* namespace libfreenect2 */

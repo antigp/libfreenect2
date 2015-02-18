@@ -24,50 +24,46 @@
  * either License.
  */
 
-#ifndef FRAME_LISTENER_HPP_
-#define FRAME_LISTENER_HPP_
+#include <iostream>
+#include <fstream>
+#include <cmath>
 
-#include <cstddef>
-#include <stdint.h>
-#include <libfreenect2/config.h>
-
-namespace libfreenect2
+void loadBufferFromFile(const char *filename, float *buffer, size_t n)
 {
+  std::ifstream in(filename, std::ios::binary);
 
-struct LIBFREENECT2_API Frame
+  in.read(reinterpret_cast<char*>(buffer), n);
+  if(in.gcount() != n) throw std::exception();
+
+  in.close();
+}
+
+int main(int argc, char **argv)
 {
-  enum Type
+  if (argc < 3)
   {
-    Color = 1,
-    Ir = 2,
-    Depth = 4
-  };
-
-  uint32_t timestamp;
-  size_t width, height, bytes_per_pixel;
-  unsigned char* data;
-
-  Frame(size_t width, size_t height, size_t bytes_per_pixel) :
-    width(width),
-    height(height),
-    bytes_per_pixel(bytes_per_pixel)
-  {
-    data = new unsigned char[width * height * bytes_per_pixel];
+    std::cerr << "Usage: " << argv[0] << " file1 file2" << std::endl;
+    return 1;
   }
+  
+  size_t image_size = 512 * 424;
+  float x[image_size], y[image_size];
+  loadBufferFromFile(argv[1], x, sizeof(x));
+  loadBufferFromFile(argv[2], y, sizeof(y));
 
-  ~Frame()
+  double error = 0;
+  float x_max=-1.0f, y_max=-1.0f;
+  float x_min=1e10f, y_min=1e10f;
+  for (size_t i = 0; i < image_size; i++)
   {
-    delete[] data;
+    error += fabsf(x[i] - y[i]);
+    if (x[i] > x_max) x_max = x[i];
+    if (x[i] < x_min) x_min = x[i];
+    if (y[i] > y_max) y_max = y[i];
+    if (y[i] < y_min) y_min = y[i];
   }
-};
+  std::cout << "max: " << x_max << " " << y_max << " min: " << x_min << " " << y_min << std::endl;
+  std::cout << "sum error " << error  << ", " << error / image_size << std::endl;
 
-class LIBFREENECT2_API FrameListener
-{
-public:
-  virtual ~FrameListener();
-
-  virtual bool onNewFrame(Frame::Type type, Frame *frame) = 0;
-};
-
-} /* namespace libfreenect2 */
-#endif /* FRAME_LISTENER_HPP_ */
+  return 0;
+}
