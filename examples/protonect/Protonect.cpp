@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
 
   libfreenect2::Freenect2 freenect2;
-  libfreenect2::Freenect2Device *dev = freenect2.openDefaultDevice(new libfreenect2::CpuPacketPipeline());
+  libfreenect2::Freenect2Device *dev = freenect2.openDefaultDevice(new libfreenect2::CudaPacketPipeline());
 
   if(dev == 0)
   {
