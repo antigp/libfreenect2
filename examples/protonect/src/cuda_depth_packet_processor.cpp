@@ -268,6 +268,9 @@ void CudaDepthPacketProcessor::process(const DepthPacket &packet)
 
   impl_->stopTiming();
 
+  impl_->ir_frame->sequence = packet.sequence;
+  impl_->depth_frame->sequence = packet.sequence;
+    
   if(has_listener)
   {
     if(this->listener_->onNewFrame(Frame::Ir, impl_->ir_frame))
