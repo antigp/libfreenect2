@@ -17,9 +17,13 @@ mv libjpeg-turbo-$LIBJPEG_VERSION $LIBJPEG_SOURCE_DIR
 cd $LIBJPEG_SOURCE_DIR
 
 # libjpeg-turbo is missing some files config files (config.guess and config.sub)
-cp $LIBUSBX_SOURCE_DIR/config.guess ./
-cp $LIBUSBX_SOURCE_DIR/config.sub ./
+cp $LIBUSB_SOURCE_DIR/config.guess ./
+cp $LIBUSB_SOURCE_DIR/config.sub ./
 ./configure --disable-dependency-tracking --host x86_64-apple-darwin --with-jpeg8 --prefix=$LIBJPEG_INSTALL_DIR 
 make && make install
+
+#get the missing cl.hpp from Khronos.org
+cd /System/Library/Frameworks/OpenCL.framework/Versions/A/Headers/ 
+[ -f cl.hpp ] || sudo wget http://www.khronos.org/registry/cl/api/1.2/cl.hpp
 
 cd $DEPENDS_DIR

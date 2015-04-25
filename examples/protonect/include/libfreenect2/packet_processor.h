@@ -24,45 +24,38 @@
  * either License.
  */
 
-#include <libfreenect2/rgb_packet_processor.h>
-#include <libfreenect2/async_packet_processor.h>
-
-#include <fstream>
-#include <string>
+#ifndef PACKET_PROCESSOR_H_
+#define PACKET_PROCESSOR_H_
 
 namespace libfreenect2
 {
 
-RgbPacketProcessor::RgbPacketProcessor() :
-    listener_(0)
+template<typename PacketT>
+class PacketProcessor
 {
-}
+public:
+  virtual ~PacketProcessor() {}
 
-RgbPacketProcessor::~RgbPacketProcessor()
-{
-}
+  virtual bool ready() { return true; }
+  virtual void process(const PacketT &packet) = 0;
+};
 
-void RgbPacketProcessor::setFrameListener(libfreenect2::FrameListener *listener)
+template<typename PacketT>
+class NoopPacketProcessor : public PacketProcessor<PacketT>
 {
-  listener_ = listener;
-}
+public:
+  NoopPacketProcessor() {}
+  virtual ~NoopPacketProcessor() {}
 
-DumpRgbPacketProcessor::DumpRgbPacketProcessor()
-{
-}
+  virtual void process(const PacketT &packet) {}
+};
 
-DumpRgbPacketProcessor::~DumpRgbPacketProcessor()
+template<typename PacketT>
+PacketProcessor<PacketT> *noopProcessor()
 {
-}
-
-void DumpRgbPacketProcessor::process(const RgbPacket &packet)
-{
-  //std::stringstream name;
-  //name << packet->sequence << "_" << packet->unknown0 << "_" << jpeg_buffer_length << ".jpeg";
-  //
-  //std::ofstream file(name.str().c_str());
-  //file.write(reinterpret_cast<char *>(packet->jpeg_buffer), jpeg_buffer_length);
-  //file.close();
+  static NoopPacketProcessor<PacketT> noop_processor_;
+  return &noop_processor_;
 }
 
 } /* namespace libfreenect2 */
+#endif /* PACKET_PROCESSOR_H_ */

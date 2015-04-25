@@ -24,45 +24,33 @@
  * either License.
  */
 
-#include <libfreenect2/rgb_packet_processor.h>
-#include <libfreenect2/async_packet_processor.h>
+#ifndef REGISTRATION_H_
+#define REGISTRATION_H_
 
-#include <fstream>
 #include <string>
+#include <libfreenect2/config.h>
+#include <libfreenect2/libfreenect2.hpp>
 
 namespace libfreenect2
 {
 
-RgbPacketProcessor::RgbPacketProcessor() :
-    listener_(0)
+class LIBFREENECT2_API Registration
 {
-}
+public:
+  Registration(Freenect2Device::IrCameraParams *depth_p, Freenect2Device::ColorCameraParams *rgb_p);
 
-RgbPacketProcessor::~RgbPacketProcessor()
-{
-}
+  void apply( int dx, int dy, float dz, float& cx, float &cy);
 
-void RgbPacketProcessor::setFrameListener(libfreenect2::FrameListener *listener)
-{
-  listener_ = listener;
-}
+private:
+  void undistort_depth(int dx, int dy, float& mx, float& my);
+  void depth_to_color(float mx, float my, float& rx, float& ry);
 
-DumpRgbPacketProcessor::DumpRgbPacketProcessor()
-{
-}
+  Freenect2Device::IrCameraParams depth;
+  Freenect2Device::ColorCameraParams color;
 
-DumpRgbPacketProcessor::~DumpRgbPacketProcessor()
-{
-}
-
-void DumpRgbPacketProcessor::process(const RgbPacket &packet)
-{
-  //std::stringstream name;
-  //name << packet->sequence << "_" << packet->unknown0 << "_" << jpeg_buffer_length << ".jpeg";
-  //
-  //std::ofstream file(name.str().c_str());
-  //file.write(reinterpret_cast<char *>(packet->jpeg_buffer), jpeg_buffer_length);
-  //file.close();
-}
+  float undistort_map[512][424][2];
+  float depth_to_color_map[512][424][2];
+};
 
 } /* namespace libfreenect2 */
+#endif /* REGISTRATION_H_ */

@@ -23,41 +23,23 @@
  * Binary distributions must follow the binary distribution requirements of
  * either License.
  */
+ 
+ 
+#ifndef DATA_CALLBACK_H_
+#define DATA_CALLBACK_H_
 
-#ifndef OPENGL_H_
-#define OPENGL_H_
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <stddef.h>
+#include <libfreenect2/config.h>
 
 namespace libfreenect2
 {
 
-struct OpenGLContext
+class LIBFREENECT2_API DataCallback
 {
-  GLFWwindow *glfw_ctx;
-  GLEWContext *glew_ctx;
-
-  OpenGLContext(GLFWwindow *ctx);
-  ~OpenGLContext();
-
-  void makeCurrent() const;
-
-  static void detachCurrent();
-  static const OpenGLContext* current();
+public:
+  virtual void onDataReceived(unsigned char *buffer, size_t n) = 0;
 };
 
+} // namespace libfreenect2
 
-struct ChangeCurrentOpenGLContext
-{
-  const OpenGLContext *last_ctx;
-
-  ChangeCurrentOpenGLContext(const OpenGLContext &new_context);
-  ~ChangeCurrentOpenGLContext();
-};
-
-} /* namespace libfreenect2 */
-
-GLEWContext *glewGetContext();
-
-#endif /* OPENGL_H_ */
+#endif // DATA_CALLBACK_H_

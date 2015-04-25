@@ -24,7 +24,7 @@
  * either License.
  */
 
-#include <libfreenect2/opengl.h>
+#include <GLFW/glfw3.h>
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
@@ -58,12 +58,14 @@ int main(int argc, char **argv) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
   GLFWwindow* window = glfwCreateWindow(1200, 600, "OpenGL", 0, 0); // Windowed
-  libfreenect2::OpenGLContext opengl_ctx(window);
 
   libfreenect2::SyncMultiFrameListener fl(libfreenect2::Frame::Ir | libfreenect2::Frame::Depth);
   libfreenect2::FrameMap frames;
@@ -72,7 +74,7 @@ int main(int argc, char **argv) {
   cfg.EnableBilateralFilter = false;
   cfg.EnableEdgeAwareFilter = false;
 
-  libfreenect2::OpenGLDepthPacketProcessor processor(opengl_ctx.glfw_ctx);
+  libfreenect2::OpenGLDepthPacketProcessor processor(window, true);
   processor.setConfiguration(cfg);
   processor.setFrameListener(&fl);
   processor.loadP0TablesFromFiles((binpath + "../p00.bin").c_str(), (binpath + "../p01.bin").c_str(), (binpath + "../p02.bin").c_str());
@@ -88,7 +90,7 @@ int main(int argc, char **argv) {
   ref_processor.loadXTableFromFile("");
   ref_processor.loadZTableFromFile("");
 
-  libfreenect2::AsyncPacketProcessor<libfreenect2::DepthPacket, libfreenect2::DepthPacketProcessor> async(&processor);
+  libfreenect2::AsyncPacketProcessor<libfreenect2::DepthPacket> async(&processor);
 
   libfreenect2::DepthPacket p;
   p.buffer_length = 352*424*10*2;
@@ -139,8 +141,8 @@ int main(int argc, char **argv) {
       async.process(p);
     //processor.process(p);
 
-    opengl_ctx.makeCurrent();
-    glfwSwapBuffers(opengl_ctx.glfw_ctx);
+    glfwMakeContextCurrent(window);
+    glfwSwapBuffers(window);
     //glfwSwapBuffers(window_background);
     glfwPollEvents();
   }
