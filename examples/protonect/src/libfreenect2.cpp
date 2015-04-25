@@ -628,7 +628,7 @@ void Freenect2DeviceImpl::close()
 PacketPipeline *createDefaultPacketPipeline()
 {
 #ifdef LIBFREENECT2_WITH_OPENGL_SUPPORT
-  return new OpenGLPacketPipeline();
+  return new OpenCLPacketPipeline();
 #else
   #ifdef LIBFREENECT2_WITH_OPENCL_SUPPORT
     return new OpenCLPacketPipeline();

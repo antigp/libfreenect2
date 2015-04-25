@@ -115,8 +115,20 @@ void kernel filterPixelStage1(global const float3 *a, global const float3 *b, gl
   const float3 self_a = a[i];
   const float3 self_b = b[i];
 
-  const float gaussian[9] = {GAUSSIAN_KERNEL_0, GAUSSIAN_KERNEL_1, GAUSSIAN_KERNEL_2, GAUSSIAN_KERNEL_3, GAUSSIAN_KERNEL_4, GAUSSIAN_KERNEL_5, GAUSSIAN_KERNEL_6, GAUSSIAN_KERNEL_7, GAUSSIAN_KERNEL_8};
+  //const float gaussian[9] = {GAUSSIAN_KERNEL_0, GAUSSIAN_KERNEL_1, GAUSSIAN_KERNEL_2, GAUSSIAN_KERNEL_3, GAUSSIAN_KERNEL_4, GAUSSIAN_KERNEL_5, GAUSSIAN_KERNEL_6, GAUSSIAN_KERNEL_7, GAUSSIAN_KERNEL_8};
 
+    float gaussian[9];
+    gaussian[0] = GAUSSIAN_KERNEL_0;
+    gaussian[1] = GAUSSIAN_KERNEL_1;
+    gaussian[2] = GAUSSIAN_KERNEL_2;
+    gaussian[3] = GAUSSIAN_KERNEL_3;
+    gaussian[4] = GAUSSIAN_KERNEL_4;
+    gaussian[5] = GAUSSIAN_KERNEL_5;
+    gaussian[6] = GAUSSIAN_KERNEL_6;
+    gaussian[7] = GAUSSIAN_KERNEL_7;
+    gaussian[8] = GAUSSIAN_KERNEL_8;
+
+    
   if(x < 1 || y < 1 || x > 510 || y > 422)
   {
     a_out[i] = self_a;

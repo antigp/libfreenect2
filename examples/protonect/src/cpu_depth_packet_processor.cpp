@@ -822,6 +822,8 @@ void CpuDepthPacketProcessor::process(const DepthPacket &packet)
   }
 
   impl_->stopTiming();
+    impl_->ir_frame->sequence = packet.sequence;
+    impl_->depth_frame->sequence = packet.sequence;
 }
 
 } /* namespace libfreenect2 */

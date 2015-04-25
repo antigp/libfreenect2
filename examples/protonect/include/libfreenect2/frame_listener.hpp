@@ -29,6 +29,7 @@
 
 #include <cstddef>
 #include <libfreenect2/config.h>
+#include <stdint.h>
 
 namespace libfreenect2
 {
@@ -44,6 +45,7 @@ struct LIBFREENECT2_API Frame
 
   size_t width, height, bytes_per_pixel;
   unsigned char* data;
+  uint32_t sequence;
 
   Frame(size_t width, size_t height, size_t bytes_per_pixel) :
     width(width),

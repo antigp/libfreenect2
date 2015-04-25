@@ -937,7 +937,10 @@ void OpenGLDepthPacketProcessor::process(const DepthPacket &packet)
   if(impl_->do_debug) glfwSwapBuffers(impl_->opengl_context_ptr);
 
   impl_->stopTiming();
-
+  
+  ir->sequence = packet.sequence;
+  depth->sequence = packet.sequence;
+    
   if(has_listener)
   {
     if(!this->listener_->onNewFrame(Frame::Ir, ir))
